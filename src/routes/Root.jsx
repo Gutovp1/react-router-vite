@@ -26,9 +26,15 @@ export default function Root() {
   const { contacts, q } = useLoaderData();
   const navigation = useNavigation();
   const submit = useSubmit();
+
+  const searching =
+    navigation.location &&
+    new URLSearchParams(navigation.location.search).has("q");
+
   useEffect(() => {
     document.getElementById("q").value = q;
   }, [q]);
+
   return (
     <>
       <div id="sidebar">
@@ -42,11 +48,13 @@ export default function Root() {
               aria-label="Search contacts"
               placeholder="Search"
               defaultValue={q}
+              className={searching ? "loading" : ""}
               onChange={(e) => {
-                submit(e.currentTarget.form);
+                const isFirstSearch = q == null;
+                submit(e.currentTarget.form, { replace: !isFirstSearch });
               }}
             />
-            <div id="search-spinner" aria-hidden hidden={true} />
+            <div id="search-spinner" aria-hidden hidden={!searching} />
             <div className="sr-only" aria-live="polite"></div>
           </Form>
           <Form method="post">
@@ -73,16 +81,6 @@ export default function Root() {
                     )}{" "}
                     {ctc.favorite && <span>★</span>}
                   </NavLink>
-                  {/* <Link to={`contacts/${ctc.id}`}>
-                    {ctc.first || ctc.last ? (
-                      <>
-                        {ctc.first} {ctc.last}
-                      </>
-                    ) : (
-                      <i>No Name</i>
-                    )}{" "}
-                    {ctc.favorite && <span>★</span>}
-                  </Link> */}
                 </li>
               ))}
             </ul>
